@@ -9,7 +9,7 @@
       "type": "string"
     },
     "stuff": {
-      "type": "stringX"
+      "type": "number"
     }
   },
   "required": ["top"]

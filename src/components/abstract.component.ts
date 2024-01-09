@@ -7,7 +7,11 @@ export abstract class AbstractComponent extends HTMLElement {
 
 	private static _registeredComponentsStyles: string[] = [];
 
-	private _instanceID = "id" + Math.random().toString(36).substring(2, 10);
+	// private static readonly COMPONENT_ID = "id" + Math.random().toString(36).substring(2, 10);
+
+	// getComponentID(): string {
+	// 	return "##no_cmp_id";
+	// }
 
 	// Get overridden by decorator
 	getTemplate(): string {
@@ -27,7 +31,7 @@ export abstract class AbstractComponent extends HTMLElement {
 	}
 
 	private createInstancedCSSSelector(selector: string): string {
-		return `${selector}[${this._instanceID}]`;
+		return `${selector}[${this.getComponentID()}]`;
 	}
 
 	private getProcessedStyling(): string {
@@ -40,8 +44,8 @@ export abstract class AbstractComponent extends HTMLElement {
 					return this.getSelector();
 			}
 		});
-		processedStyling = processedStyling.replace(/\.(\w+)/g, (match, g1) => {
-			return this.createInstancedCSSSelector('g1');
+		processedStyling = processedStyling.replace(/\.(\w+([-]\w+)*)/g, (match, g1) => {
+			return this.createInstancedCSSSelector(`.${g1}`);
 		});
 		return processedStyling;
 	}
@@ -58,8 +62,12 @@ export abstract class AbstractComponent extends HTMLElement {
 	render() {
 		this.innerHTML = this.getProcessedTemplate();
 		this.createStyling();
-		this.setAttribute(this._instanceID, '');
+		this.setAttribute(this.getComponentID(), '');
 	}
+
+	// connectedCallback() {
+	// 	this.render();
+	// }
 
 	// private get selector(): string {
 	// 	// @ts-ignore
@@ -70,6 +78,11 @@ export abstract class AbstractComponent extends HTMLElement {
 	static get SELECTOR(): string {
 		// @ts-ignore
 		return this.prototype['__selector'] ?? '##no_selector';
+	}
+
+	// Gets overwritten by decorator
+	getComponentID(): string {
+		return '##no_component_id';
 	}
 
 	private getProcessedTemplate(): string {
@@ -84,7 +97,12 @@ export abstract class AbstractComponent extends HTMLElement {
 		});
 		// <ELEMENT>
 		processedTemplate = processedTemplate.replace(/<(?!!--)\s*(\w+)\b/g, (match, g1) => {
-			return `<${g1} ${this._instanceID}`;
+			// Ignoring own components
+			// needs rework
+			if (g1 !== "je") {
+				return `<${g1} ${this.getComponentID()}`;
+			}
+			return match;
 		});
 		return processedTemplate;
 	}
@@ -125,10 +143,18 @@ export abstract class AbstractComponent extends HTMLElement {
 	}
 
 	addElement(element: AbstractComponent, id = 'main') {
-		// const container = this.querySelector(`#${id}_${this._instanceID}`);
+		// const container = this.querySelector(`#${id}_${this.getComponentID()}`);
 		const container = this.querySelector(this.createInstancedCSSSelector(`#${id}`));
 		if (container) {
 			container.appendChild(element);
 		}
+	}
+
+	private _labelText: string | undefined;
+	set labelText(text: string | undefined) {
+		this._labelText = text;
+	}
+	get labelText(): string | undefined {
+		return this._labelText;
 	}
 }

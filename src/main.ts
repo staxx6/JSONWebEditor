@@ -1,6 +1,7 @@
 import schema from './schemas/test-schema.json';
 import { TextFieldComponent } from "./components/text-field.component.ts";
 import { FormComponent } from "./components/form.component.ts";
+import { NumberFieldComponent } from "./components/number-field.component.ts";
 
 createForm(schema);
 
@@ -11,9 +12,15 @@ function createForm(schema: any): void {
 	// const form = document.createElement('form');
 	const form = createHTMLComponent(FormComponent.SELECTOR) as FormComponent;
 	for (const prop in properties) {
-		if (properties[prop].type === 'string') {
-			const textField = createHTMLComponent(TextFieldComponent.SELECTOR, prop) as TextFieldComponent;
-			form.addElement(textField);
+		switch (properties[prop].type) {
+			case 'string':
+				const textField = createHTMLComponent(TextFieldComponent.SELECTOR, prop) as TextFieldComponent;
+				form.addElement(textField);
+				break;
+			case 'number':
+				const numberField = createHTMLComponent(NumberFieldComponent.SELECTOR, prop) as NumberFieldComponent;
+				form.addElement(numberField);
+				break;
 		}
 	}
 	document.body.appendChild(form);
@@ -36,6 +43,14 @@ function createHTMLComponent(componentName: string, labelName?: string): HTMLEle
 			textFieldComponent.labelText = labelName;
 			textFieldComponent.render();
 			return textFieldComponent;
+		case NumberFieldComponent.SELECTOR:
+			if (!customElements.get(NumberFieldComponent.SELECTOR)) {
+				customElements.define(NumberFieldComponent.SELECTOR, NumberFieldComponent);
+			}
+			const numberFieldComponent = document.createElement(NumberFieldComponent.SELECTOR) as TextFieldComponent;
+			numberFieldComponent.labelText = labelName;
+			numberFieldComponent.render();
+			return numberFieldComponent;
 		default:
 			throw new Error(`No component with name: ${componentName}`);
 	}

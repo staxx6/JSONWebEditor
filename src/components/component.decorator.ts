@@ -1,9 +1,6 @@
 interface ComponentOptions {
 	selector: string;
 	template: string;
-	/**
-	 * Currently only global styling
-	 */
 	styling?: string;
 }
 
@@ -11,20 +8,32 @@ interface ComponentOptions {
 export function Component(options: ComponentOptions) {
 	return function(constructor: Function) {
 		constructor.prototype['__selector'] = options.selector;
+		constructor.prototype['__componentID'] = "id" + Math.random().toString(36).substring(2, 10);
 
-		// Overwriting abstract function
-		constructor.prototype['getSelector'] = function getSelector(): string {
+		// Overwriting abstractComponent function
+		constructor.prototype['getComponentID'] = () => {
+			return constructor.prototype['__componentID'];
+		};
+
+		// Overwriting abstractComponent function
+		constructor.prototype['getSelector'] = () => {
 			return options.selector ?? '';
 		};
 
-		// Overwriting abstract function
-		constructor.prototype['getTemplate'] = function getTemplate(): string {
+		// Overwriting abstractComponent function
+		constructor.prototype['getTemplate'] = () => {
 			return options.template;
 		};
 
-		// Overwriting abstract function
-		constructor.prototype['getStyling'] = function getStyling(): string {
+		// Overwriting abstractComponent function
+		constructor.prototype['getStyling'] = () =>  {
 			return options.styling ?? '';
 		};
+
+		// Overwriting abstractComponent function
+		constructor.prototype['getStyling'] = () => {
+			return options.styling ?? '';
+		};
+
 	}
 }
